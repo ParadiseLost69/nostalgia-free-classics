@@ -124,7 +124,9 @@ export function ArticleEditor({ article, authorName }) {
         slug: slugLocked ? undefined : fields.slug,
         id: article?.id,
         intent,
-        content,
+        // Stringified: ProseMirror attrs are null-prototype objects, which
+        // server actions can't serialize.
+        content: JSON.stringify(content),
       });
       if (!result.ok) {
         setErrors(result.errors);
@@ -148,7 +150,7 @@ export function ArticleEditor({ article, authorName }) {
   function togglePreview() {
     if (preview !== null) return setPreview(null);
     startTransition(async () => {
-      setPreview(await renderPreview(content));
+      setPreview(await renderPreview(JSON.stringify(content)));
     });
   }
 
