@@ -2,27 +2,45 @@
 @tailwind components;
 @tailwind utilities;
 
+/*
+ * Visual identity: early-2000s fan site, rebuilt as a modern dark "arcade"
+ * UI. The page is ink-dark chrome; browsing happens on dark cards; long-form
+ * reading and forms sit on light "window" panels with purple title bars.
+ */
+
 @layer base {
   html {
     @apply bg-ink;
+    scroll-padding-top: 5rem; /* keep anchors clear of the sticky header */
   }
 
   body {
-    @apply min-h-screen bg-ink font-sans text-[15px] leading-relaxed text-grape-900;
-    /* Subtle scanlines over a faint purple grid: retro, but low contrast. */
+    @apply min-h-screen bg-ink font-sans text-[15px] leading-relaxed text-grape-50 antialiased;
     background-image:
-      repeating-linear-gradient(to bottom, rgb(255 255 255 / 0.025) 0 1px, transparent 1px 3px),
-      linear-gradient(rgb(123 63 228 / 0.08) 1px, transparent 1px),
-      linear-gradient(90deg, rgb(123 63 228 / 0.08) 1px, transparent 1px);
-    background-size: auto, 24px 24px, 24px 24px;
+      radial-gradient(ellipse 80% 50% at 50% -10%, rgb(123 63 228 / 0.35), transparent 70%),
+      radial-gradient(ellipse 60% 40% at 100% 0%, rgb(20 184 166 / 0.12), transparent 70%),
+      linear-gradient(rgb(123 63 228 / 0.07) 1px, transparent 1px),
+      linear-gradient(90deg, rgb(123 63 228 / 0.07) 1px, transparent 1px);
+    background-size: 100% 100%, 100% 100%, 32px 32px, 32px 32px;
+    background-attachment: fixed;
+  }
+
+  /* Faint scanlines over everything; purely decorative. */
+  body::after {
+    content: '';
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 100;
+    background: repeating-linear-gradient(to bottom, rgb(255 255 255 / 0.018) 0 1px, transparent 1px 3px);
   }
 
   a {
-    @apply text-teal-700 underline decoration-dotted underline-offset-2 hover:text-grape-700 hover:decoration-solid;
+    @apply text-teal-300 underline decoration-teal-300/40 decoration-1 underline-offset-[3px] transition-colors hover:text-teal-100 hover:decoration-teal-100;
   }
 
   :focus-visible {
-    @apply outline outline-2 outline-offset-2 outline-teal-500;
+    @apply outline outline-2 outline-offset-2 outline-teal-300;
   }
 
   ::selection {
@@ -31,24 +49,69 @@
 }
 
 @layer components {
-  /* ---- Panels ---- */
+  /* ---- Layout ---- */
+  .container-page {
+    @apply mx-auto w-full max-w-6xl px-4 sm:px-6;
+  }
+
+  .eyebrow {
+    @apply font-terminal text-lg uppercase leading-none tracking-[0.15em] text-teal-300;
+  }
+
+  .pixel-heading {
+    @apply font-pixel leading-snug tracking-tight;
+  }
+
+  .section-title {
+    @apply flex items-center gap-3 font-pixel text-sm text-white sm:text-base;
+  }
+  .section-title::after {
+    content: '';
+    @apply stripe-bar h-1.5 flex-1 opacity-60;
+  }
+
+  .stripe-bar {
+    background-image: repeating-linear-gradient(
+      90deg,
+      theme('colors.teal.300') 0 8px,
+      theme('colors.grape.500') 8px 16px
+    );
+  }
+
+  /* ---- Dark cards (browsing) ---- */
+  .surface {
+    @apply border border-grape-700/70 bg-grape-900/50 shadow-[0_1px_0_0_rgb(255_255_255/0.06)_inset] backdrop-blur-sm;
+  }
+
+  .card-interactive {
+    @apply transition duration-200 ease-out;
+  }
+  .card-interactive:hover,
+  .card-interactive:focus-within {
+    @apply -translate-y-1 border-teal-300/70 shadow-[0_10px_30px_-10px_rgb(79_227_207/0.45)];
+  }
+
+  /* ---- Light window panels (reading, forms) ---- */
   .panel {
-    @apply border-2 border-grape-900 bg-paper shadow-[3px_3px_0_0_rgb(0_0_0/0.45)];
+    @apply border-2 border-grape-900 bg-paper text-grape-900 shadow-[4px_4px_0_0_rgb(0_0_0/0.5)];
+  }
+  :where(.panel) a {
+    @apply text-teal-700 decoration-teal-700/40 hover:text-grape-700 hover:decoration-grape-700;
   }
 
   .title-bar {
-    @apply flex items-center gap-2 border-b-2 border-grape-900 bg-gradient-to-b from-grape-500 to-grape-700 px-3 py-1.5 font-bold text-white;
+    @apply flex items-center gap-2 border-b-2 border-grape-900 bg-gradient-to-b from-grape-500 to-grape-700 px-3 py-1.5 text-sm font-bold text-white;
     box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.35);
     text-shadow: 1px 1px 0 rgb(0 0 0 / 0.5);
   }
 
   .panel-body {
-    @apply p-3 sm:p-4;
+    @apply p-4 sm:p-5;
   }
 
   /* ---- Beveled buttons ---- */
   .btn-bevel {
-    @apply inline-flex cursor-pointer select-none items-center justify-center gap-1.5 border-2 px-3 py-1 text-sm font-bold no-underline transition-none;
+    @apply inline-flex cursor-pointer select-none items-center justify-center gap-1.5 border-2 px-3.5 py-1.5 text-sm font-bold no-underline transition-[background-color,transform] duration-100;
     @apply border-b-teal-900 border-l-teal-100 border-r-teal-900 border-t-teal-100 bg-teal-700 text-white;
     text-shadow: 1px 1px 0 rgb(0 0 0 / 0.4);
   }
@@ -58,7 +121,7 @@
   .btn-bevel:active,
   .btn-bevel[aria-pressed='true'],
   .btn-bevel.is-pressed {
-    @apply border-b-teal-100 border-l-teal-900 border-r-teal-100 border-t-teal-900;
+    @apply translate-y-px border-b-teal-100 border-l-teal-900 border-r-teal-100 border-t-teal-900;
   }
   .btn-bevel:disabled {
     @apply cursor-not-allowed opacity-60;
@@ -83,12 +146,27 @@
     @apply border-b-white border-l-grape-700 border-r-white border-t-grape-700 bg-grape-300;
   }
 
-  /* ---- Form fields ---- */
+  /* Quiet button for dark backgrounds */
+  .btn-ghost {
+    @apply inline-flex items-center justify-center gap-1.5 border border-grape-500/60 px-3 py-1.5 text-sm font-bold text-grape-50 no-underline transition-colors hover:border-teal-300 hover:bg-teal-300/10 hover:text-teal-100;
+  }
+
+  /* ---- Filter chips ---- */
+  .chip {
+    @apply inline-flex items-center gap-1 border border-grape-500/60 bg-grape-900/40 px-2.5 py-1 text-xs font-bold text-grape-100 no-underline transition-colors hover:border-teal-300 hover:text-teal-100;
+  }
+  .chip[aria-current='true'],
+  .chip[aria-current='page'] {
+    @apply border-teal-300 bg-teal-300 text-ink hover:text-ink;
+    box-shadow: inset -2px -2px 0 rgb(0 0 0 / 0.25), inset 2px 2px 0 rgb(255 255 255 / 0.5);
+  }
+
+  /* ---- Form fields (used on light panels) ---- */
   .field-label {
     @apply mb-1 block text-xs font-bold uppercase tracking-wide text-grape-700;
   }
   .field-input {
-    @apply w-full border-2 border-b-grape-100 border-l-grape-700 border-r-grape-100 border-t-grape-700 bg-white px-2 py-1 text-grape-900;
+    @apply w-full border-2 border-b-grape-100 border-l-grape-700 border-r-grape-100 border-t-grape-700 bg-white px-2 py-1.5 text-grape-900;
   }
   .field-input:focus {
     @apply outline outline-2 outline-offset-1 outline-teal-500;
@@ -102,37 +180,37 @@
 
   /* ---- Details ---- */
   .dotted-divider {
-    @apply my-3 border-0 border-t-2 border-dotted border-grape-300;
+    @apply my-4 border-0 border-t-2 border-dotted border-grape-300;
   }
 
   .badge-new {
     @apply inline-block -rotate-3 border border-yellow-700 bg-yellow-300 px-1 align-middle font-pixel text-[0.55rem] leading-4 text-grape-900;
+    animation: nf-wobble 1.6s ease-in-out infinite;
   }
 
-  .stripe-bar {
-    background-image: repeating-linear-gradient(
-      90deg,
-      theme('colors.teal.300') 0 8px,
-      theme('colors.teal.700') 8px 16px
-    );
-  }
-
-  .pixel-heading {
-    @apply font-pixel leading-snug tracking-tight;
+  .reveal {
+    animation: nf-rise 0.5s cubic-bezier(0.2, 0.7, 0.2, 1) backwards;
   }
 
   /* ---- Rendered article content (Tiptap HTML) ---- */
   .article-content {
-    @apply text-base leading-7 text-grape-900;
+    @apply text-base leading-8 text-grape-900;
   }
   .article-content > * + * {
-    @apply mt-4;
+    @apply mt-5;
+  }
+  .article-content > p:first-child::first-letter {
+    @apply float-left mr-2 mt-1 font-pixel text-3xl leading-none text-grape-500;
   }
   .article-content h2 {
-    @apply mt-8 border-b-2 border-dotted border-grape-300 pb-1 text-xl font-bold text-grape-700;
+    @apply mt-10 flex items-center gap-2 border-b-2 border-dotted border-grape-300 pb-1 text-xl font-bold text-grape-700;
+  }
+  .article-content h2::before {
+    content: '';
+    @apply inline-block h-3 w-3 shrink-0 bg-teal-500 shadow-[2px_2px_0_0_theme(colors.grape.700)];
   }
   .article-content h3 {
-    @apply mt-6 text-lg font-bold text-grape-700;
+    @apply mt-8 text-lg font-bold text-grape-700;
   }
   .article-content ul {
     @apply list-[square] pl-6 marker:text-teal-700;
@@ -144,13 +222,13 @@
     @apply my-1;
   }
   .article-content blockquote {
-    @apply border-l-4 border-teal-500 bg-teal-50 px-4 py-2 italic text-grape-900;
+    @apply relative border-l-4 border-teal-500 bg-teal-50 px-5 py-3 text-lg font-bold italic text-grape-900;
   }
   .article-content hr {
-    @apply my-6 border-0 border-t-2 border-dashed border-grape-300;
+    @apply my-8 h-1.5 border-0 stripe-bar opacity-50;
   }
   .article-content img {
-    @apply mx-auto h-auto max-w-full border-2 border-grape-900 shadow-[3px_3px_0_0_rgb(0_0_0/0.35)];
+    @apply mx-auto h-auto max-w-full border-2 border-grape-900 shadow-[4px_4px_0_0_rgb(0_0_0/0.35)];
   }
   .article-content code {
     @apply bg-grape-100 px-1 font-mono text-sm;
@@ -160,6 +238,27 @@
   }
   .article-content pre code {
     @apply bg-transparent p-0 text-inherit;
+  }
+}
+
+@keyframes nf-wobble {
+  0%,
+  100% {
+    transform: rotate(-3deg);
+  }
+  50% {
+    transform: rotate(3deg);
+  }
+}
+
+@keyframes nf-rise {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
   }
 }
 
@@ -174,20 +273,6 @@
   }
 }
 
-/* "NEW!" badge wobble: decorative, disabled for reduced motion above. */
-@keyframes nf-wobble {
-  0%,
-  100% {
-    transform: rotate(-3deg);
-  }
-  50% {
-    transform: rotate(3deg);
-  }
-}
-.badge-new {
-  animation: nf-wobble 1.6s ease-in-out infinite;
-}
-
 /* Tiptap editor surface */
 .tiptap {
   min-height: 24rem;
@@ -199,6 +284,12 @@
   height: 0;
   pointer-events: none;
   color: theme('colors.grape.300');
+}
+.tiptap > p:first-child::first-letter {
+  float: none;
+  margin: 0;
+  font: inherit;
+  color: inherit;
 }
 .tiptap img.ProseMirror-selectednode {
   outline: 3px solid theme('colors.teal.500');

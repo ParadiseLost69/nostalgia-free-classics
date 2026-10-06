@@ -175,7 +175,7 @@ export function ArticleEditor({ article, authorName }) {
       }}
     >
       {/* Sticky action bar */}
-      <div className="panel sticky top-0 z-10 flex flex-wrap items-center gap-2 px-3 py-2">
+      <div className="panel sticky top-[4.25rem] z-30 flex flex-wrap items-center gap-2 px-3 py-2">
         <span className="mr-auto text-sm">
           Status:{' '}
           <strong className={isPublished ? 'text-teal-700' : 'text-grape-700'}>

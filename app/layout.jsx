@@ -1,7 +1,6 @@
 import { Press_Start_2P, VT323 } from 'next/font/google';
 import './globals.css';
 import { Header } from '@/components/layout/Header';
-import { NavSidebar } from '@/components/layout/NavSidebar';
 import { Footer } from '@/components/layout/Footer';
 import { Providers } from '@/components/layout/Providers';
 import { SITE_NAME, SITE_TAGLINE } from '@/lib/constants';
@@ -19,13 +18,14 @@ export const metadata = {
 };
 
 export const viewport = {
-  themeColor: '#4f1fa3',
+  themeColor: '#0b0820',
+  colorScheme: 'dark',
 };
 
 export default function RootLayout({ children }) {
   return (
     <html lang="en" className={`${pixelFont.variable} ${terminalFont.variable}`}>
-      <body>
+      <body className="flex min-h-screen flex-col">
         <a
           href="#main"
           className="sr-only z-50 bg-teal-300 px-3 py-2 font-bold text-ink focus:not-sr-only focus:fixed focus:left-2 focus:top-2"
@@ -33,16 +33,11 @@ export default function RootLayout({ children }) {
           Skip to content
         </a>
         <Providers>
-          <div className="mx-auto max-w-5xl px-2 py-4 sm:px-4">
-            <Header />
-            <div className="mt-4 grid gap-4 md:grid-cols-[11rem_minmax(0,1fr)]">
-              <NavSidebar />
-              <main id="main" tabIndex={-1} className="min-w-0 focus:outline-none">
-                {children}
-              </main>
-            </div>
-            <Footer />
-          </div>
+          <Header />
+          <main id="main" tabIndex={-1} className="container-page flex-1 pt-8 focus:outline-none sm:pt-10">
+            {children}
+          </main>
+          <Footer />
         </Providers>
       </body>
     </html>

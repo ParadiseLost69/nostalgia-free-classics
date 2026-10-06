@@ -1,51 +1,100 @@
 import Link from 'next/link';
 import { ScoreBadge } from './ScoreBadge';
-import { NewBadge, Badge } from '@/components/ui/Badge';
+import { TitleScreen } from './TitleScreen';
+import { NewBadge } from '@/components/ui/Badge';
 import { formatDateShort, formatYear, isNew } from '@/lib/format';
 
 /**
- * Summary card used on home and list pages.
- * @param {{ review: { title: string, slug: string, excerpt?: string | null, gameTitle: string, platform?: string | null, gameReleaseDate: Date, score: number, datePosted?: Date | null }, headingLevel?: 2 | 3 }} props
+ * @typedef {{ id: string, title: string, slug: string, excerpt?: string | null, coverImage?: string | null,
+ *   gameTitle: string, platform?: string | null, gameReleaseDate: Date, score: number, datePosted?: Date | null }} ReviewSummary
  */
-export function ReviewCard({ review, headingLevel = 3 }) {
+
+/**
+ * Cover art, or a generated title screen when there isn't any.
+ * Cards pass no alt (the title link names the game); the review hero does.
+ */
+export function ReviewCover({ review, size = 'md', priority = false, alt = '' }) {
+  if (review.coverImage) {
+    return (
+      // eslint-disable-next-line @next/next/no-img-element
+      <img
+        src={review.coverImage}
+        alt={alt}
+        loading={priority ? 'eager' : 'lazy'}
+        decoding="async"
+        className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.03]"
+      />
+    );
+  }
+  return (
+    <TitleScreen
+      gameTitle={review.gameTitle}
+      platform={review.platform}
+      gameReleaseDate={review.gameReleaseDate}
+      size={size}
+      className="transition-transform duration-500 group-hover:scale-[1.03]"
+    />
+  );
+}
+
+/**
+ * Grid card with cover art. The whole card is clickable via the title link.
+ * @param {{ review: ReviewSummary, headingLevel?: 2 | 3, index?: number }} props
+ */
+export function ReviewCard({ review, headingLevel = 3, index = 0 }) {
   const Heading = `h${headingLevel}`;
   return (
-    <article className="flex gap-3 border-2 border-dotted border-grape-300 bg-white/60 p-3">
-      <ScoreBadge score={review.score} size="md" />
-      <div className="min-w-0 flex-1">
-        <Heading className="text-base font-bold leading-snug">
-          <Link href={`/reviews/${review.slug}`}>{review.title}</Link>{' '}
-          {isNew(review.datePosted) && <NewBadge />}
-        </Heading>
-        <p className="mt-0.5 flex flex-wrap items-center gap-1.5 text-xs text-grape-700">
-          <span className="font-bold">{review.gameTitle}</span>
-          <span aria-hidden="true">·</span>
-          <span>{formatYear(review.gameReleaseDate)}</span>
-          {review.platform && <Badge tone="teal">{review.platform}</Badge>}
-          {review.datePosted && (
-            <>
-              <span aria-hidden="true">·</span>
-              <span>Reviewed {formatDateShort(review.datePosted)}</span>
-            </>
-          )}
+    <article
+      className="surface card-interactive reveal group relative flex w-full flex-col"
+      style={{ animationDelay: `${Math.min(index, 8) * 60}ms` }}
+    >
+      <div className="relative">
+        <div className="aspect-[16/9] overflow-hidden border-b border-grape-700/70">
+          <ReviewCover review={review} />
+        </div>
+        {isNew(review.datePosted) && (
+          <span className="absolute left-3 top-3">
+            <NewBadge />
+          </span>
+        )}
+        <ScoreBadge score={review.score} size="md" className="absolute bottom-0 right-3 translate-y-1/2" />
+      </div>
+
+      <div className="flex flex-1 flex-col p-4 pt-3">
+        <p className="eyebrow pr-16 text-base">
+          {review.gameTitle} · {formatYear(review.gameReleaseDate)}
         </p>
-        {review.excerpt && <p className="mt-1.5 text-sm">{review.excerpt}</p>}
+        <Heading className="mt-1.5 text-base font-bold leading-snug text-white">
+          <Link href={`/reviews/${review.slug}`} className="text-white no-underline after:absolute after:inset-0 hover:text-teal-100">
+            {review.title}
+          </Link>
+        </Heading>
+        {review.excerpt && <p className="mt-2 line-clamp-3 text-sm text-grape-100/90">{review.excerpt}</p>}
+        <div className="mt-auto flex flex-wrap items-center gap-2 pt-4 text-xs text-grape-300">
+          {review.platform && (
+            <span className="border border-grape-500/60 px-1.5 py-0.5 font-bold uppercase tracking-wide text-grape-100">
+              {review.platform}
+            </span>
+          )}
+          {review.datePosted && <span>Reviewed {formatDateShort(review.datePosted)}</span>}
+        </div>
       </div>
     </article>
   );
 }
 
 /**
- * Compact sidebar entry.
- * @param {{ review: { title: string, slug: string, score: number, gameTitle: string } }} props
+ * Responsive card grid.
+ * @param {{ reviews: ReviewSummary[], headingLevel?: 2 | 3 }} props
  */
-export function ReviewListItem({ review }) {
+export function ReviewGrid({ reviews, headingLevel = 3 }) {
   return (
-    <li className="flex items-center gap-2 py-1.5">
-      <ScoreBadge score={review.score} size="sm" />
-      <Link href={`/reviews/${review.slug}`} className="text-sm leading-tight">
-        {review.gameTitle}
-      </Link>
-    </li>
+    <ul className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+      {reviews.map((review, i) => (
+        <li key={review.id} className="flex">
+          <ReviewCard review={review} headingLevel={headingLevel} index={i} />
+        </li>
+      ))}
+    </ul>
   );
 }

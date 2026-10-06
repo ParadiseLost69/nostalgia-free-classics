@@ -1,3 +1,4 @@
+import { AdminPageHeader } from '@/components/admin/AdminPageHeader';
 import { ArticleEditor } from '@/components/editor/ArticleEditor';
 import { getSession } from '@/lib/auth';
 
@@ -7,7 +8,7 @@ export default async function NewArticlePage() {
   const session = await getSession();
   return (
     <>
-      <h1 className="pixel-heading text-base text-white">New review</h1>
+      <AdminPageHeader title="New review" />
       <ArticleEditor article={null} authorName={session?.user?.name ?? 'Admin'} />
     </>
   );

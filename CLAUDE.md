@@ -4,7 +4,7 @@
 
 **Nostalgia-Free Classics** is a video game review site that re-evaluates older games on their own merits today, without leaning on nostalgia. The site owner (admin) writes and publishes review articles through a WYSIWYG editor. Readers can browse and read reviews and leave comments, but cannot create or edit articles.
 
-Tone of the site: honest, slightly irreverent, critical. Visual style: early-2000s web (think fan sites, GameFAQs-era portals, beveled buttons, sidebars) rendered with modern, accessible code.
+Tone of the site: honest, slightly irreverent, critical. Visual style: early-2000s web (think fan sites, GameFAQs-era portals, beveled buttons, pixel type, arcade screens) rendered as a modern, accessible dark UI.
 
 ## Tech stack
 
@@ -36,7 +36,7 @@ Run `npm run lint` and `npm run build` before considering a task done.
 
 ```
 app/
-  layout.jsx               # global shell: header, left nav sidebar, footer
+  layout.jsx               # global shell: sticky top nav header, main, footer
   page.jsx                 # home: latest reviews, top-scored, "random classic"
   reviews/
     page.jsx               # paginated list of all reviews (filter by score/platform)
@@ -194,15 +194,17 @@ colors: {
 }
 ```
 
-Purple is the dominant brand colour (headers, nav, panel title bars). Teal is the accent (links, hover states, score highlights, buttons). Ensure text meets WCAG AA contrast.
+Purple is the dominant brand colour (page glow, cards, panel title bars). Teal is the accent (links, hover states, score highlights, buttons). Ensure text meets WCAG AA contrast.
 
 ### Visual vocabulary
 
-- **Layout:** fixed-width-feeling centred container (`max-w-5xl`), header banner, **left sidebar nav**, main content column, optional right sidebar ("Latest Reviews", "Highest Scored"). Collapses to a single column on mobile.
-- **Panels:** boxes with a purple gradient title bar (`bg-gradient-to-b from-grape-500 to-grape-700`), 1–2px borders, slight inset/bevel effects.
+- **Layout:** modern dark "arcade" shell. Sticky top bar (logo, primary nav, account; admin links appear for admins; disclosure menu on mobile) with a teal/purple stripe underneath. Centred `max-w-6xl` container (`.container-page`). No sidebars in the shell: highlights live on the home page (featured review hero, card grid, "HI-SCORES" leaderboard, random classic). Review pages use a hero header, a reading panel, and a sticky "At a glance" aside that stacks on mobile.
+- **Surfaces:** ink-dark page with a faint purple grid and scanlines. Browsing UI sits on dark cards (`.surface`, `.card-interactive`). Long-form reading, comments and admin forms sit on light "window" panels (`.panel`) with a purple gradient title bar (`.title-bar`).
+- **Cards:** 16:9 cover art (or the generated `TitleScreen` fallback: game name in pixel type over a starfield) with the score badge overlapping the cover's bottom edge. The whole card is clickable via the title link.
+- **Filters:** link-based chips (`.chip`, active = `aria-current`), so filtering works without JavaScript.
 - **Buttons:** beveled look using light top/left and dark bottom/right borders; pressed state inverts the bevel.
 - **Typography:** Verdana / Tahoma / Trebuchet MS stack for body; a pixel or chunky display font for headings (e.g. "Press Start 2P" or "VT323" via `next/font/google`), used sparingly.
-- **Details:** small pixel icons, dotted dividers, "NEW!" badges on recent reviews, 88×31-style badges in the footer, subtle tiled or scanline background, visitor-counter-style stat in the footer (decorative only).
+- **Details:** small pixel icons, dotted dividers, stripe-bar section rules, "NEW!" badges on recent reviews, 88×31-style badges in the footer, visitor-counter-style stat in the footer (decorative only), VT323 "eyebrow" labels, staggered fade-up reveals on cards.
 - **Score badge:** large retro numeral in a teal box with a glow; colour shifts by score range.
 - **Avoid:** actual `<marquee>`/`<blink>` tags, auto-playing audio, layout tables, or anything that hurts accessibility. Fake the vibe with CSS.
 - Respect `prefers-reduced-motion` for any animation.

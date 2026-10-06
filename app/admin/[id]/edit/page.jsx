@@ -1,4 +1,5 @@
 import { notFound } from 'next/navigation';
+import { AdminPageHeader } from '@/components/admin/AdminPageHeader';
 import { ArticleEditor } from '@/components/editor/ArticleEditor';
 import { getArticleForEdit } from '@/lib/articles';
 import { toDateInputValue } from '@/lib/format';
@@ -28,7 +29,7 @@ export default async function EditArticlePage({ params }) {
 
   return (
     <>
-      <h1 className="pixel-heading text-base text-white">Edit: {article.title}</h1>
+      <AdminPageHeader title={`Edit: ${article.title}`} />
       <ArticleEditor article={editable} authorName={article.author.name ?? 'Admin'} />
     </>
   );
