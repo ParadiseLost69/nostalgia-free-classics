@@ -1,0 +1,109 @@
+// Local development uses SQLite (no Postgres available). SQLite does not
+// support @db.Decimal, so `score` is a Float rounded to one decimal place in
+// lib/format.js and validated on the server. To move to PostgreSQL, change
+// the provider and switch `score` back to `Decimal @db.Decimal(3, 1)`.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  ADMIN
+  READER
+}
+
+enum ArticleStatus {
+  DRAFT
+  PUBLISHED
+}
+
+model User {
+  id            String    @id @default(cuid())
+  name          String?
+  email         String    @unique
+  emailVerified DateTime?
+  image         String?
+  role          Role      @default(READER)
+  articles      Article[]
+  comments      Comment[]
+  accounts      Account[]
+  sessions      Session[]
+  createdAt     DateTime  @default(now())
+}
+
+model Article {
+  id              String        @id @default(cuid())
+  title           String
+  slug            String        @unique
+  excerpt         String?
+  content         Json
+  coverImage      String?
+  gameTitle       String
+  platform        String?
+  gameReleaseDate DateTime
+  score           Float
+  status          ArticleStatus @default(DRAFT)
+  datePosted      DateTime?
+  dateUpdated     DateTime      @updatedAt
+  createdAt       DateTime      @default(now())
+  authorId        String
+  author          User          @relation(fields: [authorId], references: [id])
+  comments        Comment[]
+
+  @@index([status, datePosted])
+}
+
+model Comment {
+  id        String   @id @default(cuid())
+  body      String
+  createdAt DateTime @default(now())
+  hidden    Boolean  @default(false)
+  articleId String
+  article   Article  @relation(fields: [articleId], references: [id], onDelete: Cascade)
+  authorId  String
+  author    User     @relation(fields: [authorId], references: [id])
+
+  @@index([articleId, createdAt])
+  @@index([authorId, createdAt])
+}
+
+// ---- Auth.js models (@auth/prisma-adapter) ----
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
+  user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
